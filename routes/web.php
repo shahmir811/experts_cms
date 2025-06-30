@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
@@ -38,8 +40,15 @@ Route::group(['middleware'=> 'auth'], function () {
     Route::get('active-sessions', [SessionController::class,'index'])->name('active-sessions');
     Route::delete('active-sessions/{id}', [SessionController::class,'destroy'])->name('active-sessions.destroy');
 
+    ///************** Backups routes **************///
     Route::get('/backups', [BackupsController::class, 'index'])->name('backups.index');
     Route::post('/backups/delete', [BackupsController::class, 'delete'])->name('backups.delete');
+
+    ///************** Customers routes **************///
+    Route::resource('customers', CustomerController::class);
+
+    ///************** Stores routes **************///
+    Route::resource('stores', StoreController::class);
 
 });
 

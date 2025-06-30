@@ -28,6 +28,14 @@ class PermissionsTableSeeder extends Seeder
             'delete session',
             'view backup',
             'delete backup',
+            'create customer',
+            'view customer',
+            'update customer',
+            'delete customer',
+            'create store',
+            'view store',
+            'update store',
+            'delete store',
         ];
 
         foreach ($permissions as $permissionName) {

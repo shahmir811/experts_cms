@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ecom CMS</title>
+    <title>{{ config('app.name') }}</title>
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <section class="vh-100 d-flex align-items-center justify-content-center bg-light">
         <div class="text-center">
-            <h1 class="display-4 fw-bold">Welcome to Ecom CMS</h1>
+            <h1 class="display-4 fw-bold">Welcome to {{ config('app.name') }}</h1>
             <p class="lead text-muted">A clean and powerful content management system for your e-commerce store.</p>
             <a href="{{ url('/login') }}" class="btn btn-primary btn-lg m-2">Login</a>
             <a href="{{ url('/register') }}" class="btn btn-outline-secondary btn-lg m-2">Register</a>
@@ -18,7 +18,7 @@
     </section>
 
     <footer class="text-center py-4 bg-white shadow-sm">
-        <small>&copy; {{ date('Y') }} Ecom CMS. All rights reserved.</small>
+        <small>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</small>
     </footer>
 
     <!-- Bootstrap JS (optional) -->
