@@ -35,7 +35,7 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>#</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Phone</th>
@@ -47,7 +47,7 @@
                     <tbody>
                         @foreach ($customers as $customer)
                             <tr>
-                                <td>{{ $customer->id }}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $customer->name }}</td>
                                 <td>{{ $customer->email }}</td>
                                 <td>{{ $customer->phone }}</td>
