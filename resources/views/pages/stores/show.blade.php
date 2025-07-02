@@ -77,8 +77,16 @@
 </div>
 
 <div class="container my-5">
+
+  @if (session('status'))
+    <div class="alert alert-success">
+      {{ session('status') }}
+    </div>
+  @endif
+
   <div class="row justify-content-center">
     <div class="col-lg-8">
+
       <div class="card shadow-lg border-0 rounded-4">
         <div class="card-header bg-primary text-white rounded-top-4">
           <h4 class="mb-0">

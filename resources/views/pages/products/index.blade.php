@@ -55,7 +55,7 @@
       <div class="card">
         <div class="card-header">
           <h4>Products
-            <a href="{{ route('products.upload.form') }}" class="btn btn-primary float-end">Upload Products</a>
+            {{-- <a href="{{ route('products.upload.form') }}" class="btn btn-primary float-end">Upload Products</a> --}}
           </h4>
         </div>
         <div class="card-body">

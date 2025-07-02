@@ -8,10 +8,11 @@ use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Store extends Model
 {
-    use HasSlug, SoftDeletes;
+    use HasSlug, SoftDeletes, HasFactory;
 
     protected $fillable = [
         'owner_id',

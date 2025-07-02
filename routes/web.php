@@ -50,6 +50,7 @@ Route::group(['middleware'=> 'auth'], function () {
 
     ///************** Stores routes **************///
     Route::resource('stores', StoreController::class);
+    Route::get('stores/{slug}/upload', [StoreController::class, 'uploadProducts'])->name('stores.upload.products');
 
     ///************** Products routes **************///
     Route::get('products', [ProductController::class, 'index'])->name('products.index');

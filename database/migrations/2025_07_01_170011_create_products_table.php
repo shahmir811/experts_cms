@@ -17,7 +17,7 @@ return new class extends Migration
             
             // Basic product info
             $table->string('title', 500)->nullable();
-            $table->string('asin', 150)->nullable();
+            $table->string('asin', 150)->unique();
             $table->string('url_amazon', 255)->nullable();
             $table->string('image', 1500)->nullable();
             $table->string('slug')->unique()->nullable();

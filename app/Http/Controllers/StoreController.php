@@ -110,4 +110,10 @@ class StoreController extends Controller
     {
         //
     }
+
+    public function uploadProducts(string $slug)
+    {
+        $store = Store::where('slug', $slug)->firstOrFail();
+        return view('pages.stores.upload', compact('store'));
+    }
 }

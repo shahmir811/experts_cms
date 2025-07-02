@@ -235,8 +235,8 @@ class ProductController extends Controller
             }
 
             return redirect()
-                ->route('products.index')
-                ->with('success', "Successfully added $newCount new products and updated $updatedCount existing products.");
+                ->route('stores.show', $store->slug)
+                ->with('status', "Successfully added $newCount new products and updated $updatedCount existing products.");
             
         } catch (\Exception $e) {
             return redirect()
