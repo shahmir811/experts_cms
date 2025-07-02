@@ -26,7 +26,7 @@
                     <th>Name</th>
                     <th>Size (KB)</th>
                     <th>Last Modified</th>
-                    <th>Action</th>
+                    {{-- <th>Action</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -35,13 +35,13 @@
                         <td>{{ $backup['name'] }}</td>
                         <td>{{ number_format($backup['size'] / 1024, 2) }}</td>
                         <td>{{ \Carbon\Carbon::createFromTimestamp($backup['last_modified'])->toDayDateTimeString() }}</td>
-                        <td>
+                        {{-- <td>
                             <form method="POST" action="{{ route('backups.delete') }}">
                                 @csrf
                                 <input type="hidden" name="path" value="{{ $backup['path'] }}">
                                 <button class="btn btn-danger btn-sm" onclick="return confirm('Delete this backup?')">Delete</button>
                             </form>
-                        </td>
+                        </td> --}}
                     </tr>
                 @endforeach
             </tbody>

@@ -13,7 +13,7 @@
             <h1 class="display-4 fw-bold">Welcome to {{ config('app.name') }}</h1>
             <p class="lead text-muted">A clean and powerful content management system for your e-commerce store.</p>
             <a href="{{ url('/login') }}" class="btn btn-primary btn-lg m-2">Login</a>
-            <a href="{{ url('/register') }}" class="btn btn-outline-secondary btn-lg m-2">Register</a>
+            {{-- <a href="{{ url('/register') }}" class="btn btn-outline-secondary btn-lg m-2">Register</a> --}}
         </div>
     </section>
 

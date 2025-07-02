@@ -9,6 +9,7 @@ use App\Models\Store;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -50,13 +51,8 @@ class ProductController extends Controller
         return view('pages.products.detail', compact('product'));
     }    
 
-
-    public function processUpload(Request $request)
-    {
-
-        // dd("Hello");
-
-            // Temporary debug code
+public function processUpload(Request $request)
+{
         logger()->info('Upload request received', [
             'store_id' => $request->store_id,
             'has_file' => $request->hasFile('excel_file'),
@@ -78,107 +74,126 @@ class ProductController extends Controller
             'excel_file.max' => 'The file may not be greater than 2MB.'
         ]);
 
-        // Manually check file presence (double validation)
-        // if (!$request->hasFile('excel_file')) {
-        //     return redirect()
-        //         ->back()
-        //         ->withErrors(['excel_file' => 'Please select an Excel file to upload.'])
-        //         ->withInput();
-        // }
+    if ($validator->fails()) {
+        return redirect()
+            ->back()
+            ->withErrors($validator)
+            ->withInput();
+    }
 
-        if ($validator->fails()) {
-            return redirect()
-                ->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+    $store = Store::findOrFail($request->store_id);
+    $file = $request->file('excel_file');
 
+    DB::beginTransaction();
+
+    try {
+        $data = Excel::toArray([], $file)[0];
         
-
-        $store = Store::findOrFail($request->store_id);
-
-        if ($validator->fails()) {
-            return redirect()
-                ->back()
-                ->withErrors($validator)
-                ->withInput();
+        if (count($data) < 2) {
+            throw new \Exception('Excel file is empty or has no data rows.');
         }
 
-        $file = $request->file('excel_file');
+        $headers = array_map('trim', $data[0]);
+        $rows = array_slice($data, 1);
+        
+        $columnMapping = [
+            'Image' => 'image',
+            'Title' => 'title',
+            'Buy Box: % Amazon 30 days' => 'buy_box_percentage_amazon_30_days',
+            'Buy Box Eligible Offer Count: New FBA' => 'buy_box_eligible_offer_count_new_fba',
+            'Amazon: Current' => 'amazon_current_price',
+            'Amazon: Stock' => 'amazon_stock',
+            'List Price: Current' => 'list_price_current',
+            'List Price: 30 days avg.' => 'list_price_30_days_avg',
+            'Count of retrieved live offers: New, FBA' => 'live_offers_fba',
+            'Count of retrieved live offers: New, FBM' => 'live_offers_fbm',
+            'URL: Amazon' => 'url_amazon',
+            'Categories: Root' => 'categories_root',
+            'Categories: Sub' => 'categories_sub',
+            'Categories: Tree' => 'categories_tree',
+            'Launchpad' => 'launchpad',
+            'ASIN' => 'asin',
+            'Manufacturer' => 'manufacturer',
+            'Unit Count: Unit Value' => 'unit_count_value',
+            'Unit Count: Unit Type' => 'unit_count_type',
+            'Material' => 'material',
+            'Item Type' => 'item_type',
+            'Number of Items' => 'number_of_items',
+            'Video Count' => 'video_count',
+            'Has Main Video' => 'has_main_video',
+            'Main Videos' => 'main_videos',
+            'Additional Videos' => 'additional_videos',
+            'Package: Dimension (cm³)' => 'package_dimension_cm3',
+            'Package: Weight (g)' => 'package_weight_g',
+            'Package: Quantity' => 'package_quantity',
+            'Item: Dimension (cm³)' => 'item_dimension_cm3',
+            'Item: Length (cm)' => 'item_length_cm',
+            'Item: Width (cm)' => 'item_width_cm',
+            'Item: Height (cm)' => 'item_height_cm',
+            'Item: Weight (g)' => 'item_weight_g',
+            'Batteries Included' => 'batteries_included',
+            'Hazardous Materials' => 'hazardous_materials',
+        ];
 
-        try {
-            $data = Excel::toArray([], $file)[0]; // Get first sheet data
+        // Map headers to indices
+        $headerIndices = [];
+        foreach ($headers as $index => $header) {
+            $normalizedHeader = trim($header);
+            if (isset($columnMapping[$normalizedHeader])) {
+                $headerIndices[$columnMapping[$normalizedHeader]] = $index;
+            }
+        }
+
+        // Verify required columns exist
+        if (!isset($headerIndices['asin']) || !isset($headerIndices['title'])) {
+            throw new \Exception('Required columns (ASIN and Title) are missing in the file.');
+        }
+
+        $newCount = 0;
+        $skippedCount = 0;
+        
+        // Get existing ASINs (case-insensitive)
+        $existingAsins = Product::where('store_id', $store->id)
+            ->select(DB::raw('LOWER(asin) as asin'))
+            ->pluck('asin')
+            ->toArray();
+
+        // Track processed ASINs in this upload
+        $processedAsins = [];
+
+        foreach ($rows as $rowIndex => $row) {
+            $asin = trim(strtoupper($row[$headerIndices['asin']] ?? ''));
             
-            if (count($data) < 2) {
-                return redirect()
-                    ->back()
-                    ->with('error', 'Excel file is empty or has no data rows.');
+            // Skip empty ASINs
+            if (empty($asin)) {
+                $skippedCount++;
+                continue;
             }
 
-            $headers = $data[0]; // First row is headers
-            $rows = array_slice($data, 1); // Data starts from second row
-            
-            $columnMapping = [
-                'Image' => 'image',
-                'Title' => 'title',
-                'Buy Box: % Amazon 30 days' => 'buy_box_percentage_amazon_30_days',
-                'Buy Box Eligible Offer Count: New FBA' => 'buy_box_eligible_offer_count_new_fba',
-                'Amazon: Current' => 'amazon_current_price',
-                'Amazon: Stock' => 'amazon_stock',
-                'List Price: Current' => 'list_price_current',
-                'List Price: 30 days avg.' => 'list_price_30_days_avg',
-                'Count of retrieved live offers: New, FBA' => 'live_offers_fba',
-                'Count of retrieved live offers: New, FBM' => 'live_offers_fbm',
-                'URL: Amazon' => 'url_amazon',
-                'Categories: Root' => 'categories_root',
-                'Categories: Sub' => 'categories_sub',
-                'Categories: Tree' => 'categories_tree',
-                'Launchpad' => 'launchpad',
-                'ASIN' => 'asin',
-                'Manufacturer' => 'manufacturer',
-                'Unit Count: Unit Value' => 'unit_count_value',
-                'Unit Count: Unit Type' => 'unit_count_type',
-                'Material' => 'material',
-                'Item Type' => 'item_type',
-                'Number of Items' => 'number_of_items',
-                'Video Count' => 'video_count',
-                'Has Main Video' => 'has_main_video',
-                'Main Videos' => 'main_videos',
-                'Additional Videos' => 'additional_videos',
-                'Package: Dimension (cm³)' => 'package_dimension_cm3',
-                'Package: Weight (g)' => 'package_weight_g',
-                'Package: Quantity' => 'package_quantity',
-                'Item: Dimension (cm³)' => 'item_dimension_cm3',
-                'Item: Length (cm)' => 'item_length_cm',
-                'Item: Width (cm)' => 'item_width_cm',
-                'Item: Height (cm)' => 'item_height_cm',
-                'Item: Weight (g)' => 'item_weight_g',
-                'Batteries Included' => 'batteries_included',
-                'Hazardous Materials' => 'hazardous_materials',
-            ];
+            // Normalize for comparison
+            $normalizedAsin = strtolower($asin);
 
-            $headerIndices = [];
-            foreach ($headers as $index => $header) {
-                if (isset($columnMapping[$header])) {
-                    $headerIndices[$columnMapping[$header]] = $index;
-                }
+            // Skip duplicates in database
+            if (in_array($normalizedAsin, $existingAsins)) {
+                $skippedCount++;
+                continue;
             }
 
-            $newCount = 0;
-            $updatedCount = 0;
-            $existingAsins = Product::where('store_id', $store->id)->pluck('asin')->toArray();
+            // Skip duplicates in current file
+            if (in_array($normalizedAsin, $processedAsins)) {
+                $skippedCount++;
+                continue;
+            }
 
-            foreach ($rows as $row) {
-                $asin = $row[$headerIndices['asin']] ?? null;
-                
-                if (empty($asin)) {
-                    continue;
-                }
+            // Add to processed ASINs
+            $processedAsins[] = $normalizedAsin;
+            $existingAsins[] = $normalizedAsin; // Prevent duplicates in same transaction
 
+            try {
                 $productData = [
                     'store_id' => $store->id,
-                    'title' => $row[$headerIndices['title']] ?? null,
-                    'buy_box_percentage_amazon_30_days' => $row[$headerIndices['buy_box_percentage_amazon_30_days']] ?? null,
+                    'title' => $this->cleanText($row[$headerIndices['title']] ?? null),
+                    'buy_box_percentage_amazon_30_days' => $this->cleanText($row[$headerIndices['buy_box_percentage_amazon_30_days']] ?? null),
                     'buy_box_eligible_offer_count_new_fba' => $this->parseInteger($row[$headerIndices['buy_box_eligible_offer_count_new_fba']] ?? null),
                     'amazon_current_price' => $this->parseDecimal($row[$headerIndices['amazon_current_price']] ?? null),
                     'amazon_stock' => $this->parseInteger($row[$headerIndices['amazon_stock']] ?? null),
@@ -186,21 +201,21 @@ class ProductController extends Controller
                     'list_price_30_days_avg' => $this->parseDecimal($row[$headerIndices['list_price_30_days_avg']] ?? null),
                     'live_offers_fba' => $this->parseInteger($row[$headerIndices['live_offers_fba']] ?? null),
                     'live_offers_fbm' => $this->parseInteger($row[$headerIndices['live_offers_fbm']] ?? null),
-                    'url_amazon' => $row[$headerIndices['url_amazon']] ?? null,
-                    'categories_root' => $row[$headerIndices['categories_root']] ?? null,
-                    'categories_sub' => $row[$headerIndices['categories_sub']] ?? null,
-                    'categories_tree' => $row[$headerIndices['categories_tree']] ?? null,
-                    'launchpad' => $row[$headerIndices['launchpad']] ?? null,
+                    'url_amazon' => $this->truncateUrl($row[$headerIndices['url_amazon']] ?? null),
+                    'categories_root' => $this->cleanText($row[$headerIndices['categories_root']] ?? null),
+                    'categories_sub' => $this->cleanText($row[$headerIndices['categories_sub']] ?? null),
+                    'categories_tree' => $this->cleanText($row[$headerIndices['categories_tree']] ?? null),
+                    'launchpad' => $this->cleanText($row[$headerIndices['launchpad']] ?? null),
                     'asin' => $asin,
-                    'manufacturer' => $row[$headerIndices['manufacturer']] ?? null,
-                    'unit_count_value' => $row[$headerIndices['unit_count_value']] ?? null,
-                    'unit_count_type' => $row[$headerIndices['unit_count_type']] ?? null,
-                    'material' => $row[$headerIndices['material']] ?? null,
-                    'item_type' => $row[$headerIndices['item_type']] ?? null,
+                    'manufacturer' => $this->cleanText($row[$headerIndices['manufacturer']] ?? null),
+                    'unit_count_value' => $this->cleanText($row[$headerIndices['unit_count_value']] ?? null),
+                    'unit_count_type' => $this->cleanText($row[$headerIndices['unit_count_type']] ?? null),
+                    'material' => $this->cleanText($row[$headerIndices['material']] ?? null),
+                    'item_type' => $this->cleanText($row[$headerIndices['item_type']] ?? null),
                     'number_of_items' => $this->parseInteger($row[$headerIndices['number_of_items']] ?? null),
                     'video_count' => $this->parseInteger($row[$headerIndices['video_count']] ?? null),
                     'has_main_video' => $this->parseBoolean($row[$headerIndices['has_main_video']] ?? null),
-                    'main_videos' => $row[$headerIndices['main_videos']] ?? null,
+                    'main_videos' => $this->cleanText($row[$headerIndices['main_videos']] ?? null),
                     'additional_videos' => $this->cleanText($row[$headerIndices['additional_videos']] ?? null),
                     'package_dimension_cm3' => $this->parseDecimal($row[$headerIndices['package_dimension_cm3']] ?? null),
                     'package_weight_g' => $this->parseDecimal($row[$headerIndices['package_weight_g']] ?? null),
@@ -211,40 +226,38 @@ class ProductController extends Controller
                     'item_height_cm' => $this->parseDecimal($row[$headerIndices['item_height_cm']] ?? null),
                     'item_weight_g' => $this->parseDecimal($row[$headerIndices['item_weight_g']] ?? null),
                     'batteries_included' => $this->parseBoolean($row[$headerIndices['batteries_included']] ?? null),
-                    'hazardous_materials' => $row[$headerIndices['hazardous_materials']] ?? null,
+                    'hazardous_materials' => $this->cleanText($row[$headerIndices['hazardous_materials']] ?? null),
                     'image' => $this->truncateUrl($row[$headerIndices['image']] ?? null),
+                    'slug' => Str::slug($row[$headerIndices['title']] ?? 'product-'.time().'-'.$rowIndex),
                 ];
 
-                if (in_array($asin, $existingAsins)) {
-                    // Update existing product
-                    Product::where('asin', $asin)
-                        ->where('store_id', $store->id)
-                        ->update([
-                            'amazon_current_price' => $productData['amazon_current_price'],
-                            'amazon_stock' => $productData['amazon_stock'],
-                            'list_price_current' => $productData['list_price_current'],
-                            'list_price_30_days_avg' => $productData['list_price_30_days_avg'],
-                        ]);
-                    $updatedCount++;
-                } else {
-                    // Create new product
-                    $productData['slug'] = Str::slug($productData['title']);
-                    Product::create($productData);
-                    $newCount++;
-                }
-            }
+                Product::create($productData);
+                $newCount++;
 
-            return redirect()
-                ->route('stores.show', $store->slug)
-                ->with('status', "Successfully added $newCount new products and updated $updatedCount existing products.");
-            
-        } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('error', 'Error processing file: ' . $e->getMessage())
-                ->withInput();
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Catch any remaining duplicate errors
+                if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                    $skippedCount++;
+                    continue;
+                }
+                throw $e;
+            }
         }
+
+        DB::commit();
+
+        return redirect()
+            ->route('stores.show', $store->slug)
+            ->with('status', "Successfully added $newCount new products. Skipped $skippedCount duplicate records.");
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()
+            ->back()
+            ->with('error', 'Error processing file: ' . $e->getMessage())
+            ->withInput();
     }
+}
 
     private function parseDecimal($value)
     {

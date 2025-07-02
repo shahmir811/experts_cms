@@ -107,8 +107,8 @@ class UsersTableSeeder extends Seeder
         // Assign super-admin role to both users
         $user1->assignRole('super-admin');
         $user2->assignRole('super-admin');
-        $user3->assignRole('admin');
-        $user4->assignRole('admin');
+        $user3->assignRole('user');
+        $user4->assignRole('user');
         $user5->assignRole('user');
         $user6->assignRole('user');
         $user7->assignRole('user');

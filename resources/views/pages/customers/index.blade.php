@@ -53,20 +53,26 @@
         <div class="card">
           <div class="card-header">
             <h4>Customers
-              <a href="{{ route('customers.create') }}" class="btn btn-primary float-end">Add Customer</a>
+              <a href="{{ route('customers.create') }}" class="btn btn-primary float-end">
+                <i class="bi bi-plus-circle-fill"></i> Add Customer
+              </a>
             </h4>
           </div>
           <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-6">
                     <form action="{{ route('customers.index') }}" method="GET">
-                        <div class="input-group">
-                            <input type="text" name="search" class="form-control" placeholder="Search by customer name" value="{{ request('search') }}">
-                            <button class="btn btn-outline-secondary" type="submit">Search</button>
-                            @if(request('search'))
-                                <a href="{{ route('customers.index') }}" class="btn btn-outline-danger btn-clear-search">Clear</a>
-                            @endif
-                        </div>
+                      <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Search by customer name" value="{{ request('search') }}">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                        @if(request('search'))
+                            <a href="{{ route('customers.index') }}" class="btn btn-outline-danger btn-clear-search">
+                                <i class="bi bi-x-circle-fill"></i> Clear
+                            </a>
+                        @endif
+                    </div>
                     </form>
                 </div>
             </div>
@@ -93,8 +99,12 @@
                                 <td>{{ $customer->city }}</td>
                                 <td>{{ $customer->state }}</td>
                                 <td>
-                                  <a href="{{ route('customers.show', $customer->slug) }}" class="btn btn-warning mr-2">View</a>
-                                  <a href="{{ route('customers.edit', $customer->slug) }}" class="btn btn-primary">Edit</a>
+                                  <a href="{{ route('customers.show', $customer->slug) }}" class="btn btn-warning mr-5">
+                                    <i class="bi bi-eye-fill"></i> View
+                                  </a>
+                                  <a href="{{ route('customers.edit', $customer->slug) }}" class="btn btn-primary">
+                                    <i class="bi bi-pencil-fill"></i> Edit
+                                  </a>
                                 </td>
                             </tr>
                         @endforeach

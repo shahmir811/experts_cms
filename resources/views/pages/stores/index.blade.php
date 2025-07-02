@@ -53,7 +53,9 @@
       <div class="card">
         <div class="card-header">
           <h4>Stores
-            <a href="{{ route('stores.create') }}" class="btn btn-primary float-end">Add Store</a>
+            <a href="{{ route('stores.create') }}" class="btn btn-primary float-end">
+              <i class="bi bi-plus-circle-fill"></i> Add Store
+            </a>
           </h4>
         </div>
         <div class="card-body">
@@ -62,9 +64,13 @@
               <form action="{{ route('stores.index') }}" method="GET">
                 <div class="input-group">
                   <input type="text" name="search" class="form-control" placeholder="Search by store name" value="{{ request('search') }}">
-                  <button class="btn btn-outline-secondary" type="submit">Search</button>
+                  <button class="btn btn-outline-secondary" type="submit">
+                    <i class="bi bi-search"></i> Search
+                  </button>
                   @if(request('search'))
-                    <a href="{{ route('stores.index') }}" class="btn btn-outline-danger btn-clear-search">Clear</a>
+                    <a href="{{ route('stores.index') }}" class="btn btn-outline-danger btn-clear-search">
+                      <i class="bi bi-x-circle-fill"></i> Clear
+                    </a>
                   @endif
                 </div>
               </form>
@@ -90,9 +96,15 @@
                     <td>{{ $store->owner->name }}</td>
                     <td>{{ $store->products->count() }}</td>
                     <td>
-                      <a href="{{ route('stores.upload.products', $store->slug) }}" class="btn btn-success mr-5">Upload</a>
-                      <a href="{{ route('stores.show', $store->slug) }}" class="btn btn-warning mr-5">View</a>
-                      <a href="{{ route('stores.edit', $store->slug) }}" class="btn btn-primary">Edit</a>
+                      <a href="{{ route('stores.upload.products', $store->slug) }}" class="btn btn-success mr-5">
+                        <i class="bi bi-upload"></i> Upload
+                      </a>
+                      <a href="{{ route('stores.show', $store->slug) }}" class="btn btn-warning mr-5">
+                        <i class="bi bi-eye-fill"></i> View
+                      </a>
+                      <a href="{{ route('stores.edit', $store->slug) }}" class="btn btn-primary">
+                        <i class="bi bi-pencil-fill"></i> Edit
+                      </a>
                     </td>
                   </tr>
                 @endforeach
@@ -111,11 +123,13 @@
                       {{-- Previous Page Link --}}
                       @if ($stores->onFirstPage())
                           <li class="page-item disabled">
-                              <span class="page-link">&laquo; Previous</span>
+                              <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
                           </li>
                       @else
                           <li class="page-item">
-                              <a class="page-link" href="{{ $stores->previousPageUrl() }}" rel="prev">&laquo; Previous</a>
+                              <a class="page-link" href="{{ $stores->previousPageUrl() }}" rel="prev">
+                                <i class="bi bi-chevron-left"></i> Previous
+                              </a>
                           </li>
                       @endif
 
@@ -135,11 +149,13 @@
                       {{-- Next Page Link --}}
                       @if ($stores->hasMorePages())
                           <li class="page-item">
-                              <a class="page-link" href="{{ $stores->nextPageUrl() }}" rel="next">Next &raquo;</a>
+                              <a class="page-link" href="{{ $stores->nextPageUrl() }}" rel="next">
+                                Next <i class="bi bi-chevron-right"></i>
+                              </a>
                           </li>
                       @else
                           <li class="page-item disabled">
-                              <span class="page-link">Next &raquo;</span>
+                              <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
                           </li>
                       @endif
                   </ul>
