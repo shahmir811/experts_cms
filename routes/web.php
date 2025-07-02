@@ -8,6 +8,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\BackupsController;
+use App\Http\Controllers\ProductController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -49,6 +50,12 @@ Route::group(['middleware'=> 'auth'], function () {
 
     ///************** Stores routes **************///
     Route::resource('stores', StoreController::class);
+
+    ///************** Products routes **************///
+    Route::get('products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('products/upload', [ProductController::class, 'upload'])->name('products.upload.form');
+    Route::post('products/upload', [ProductController::class, 'processUpload'])->name('products.upload');
+
 
 });
 

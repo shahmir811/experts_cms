@@ -7,6 +7,7 @@ use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Store extends Model
 {
@@ -28,7 +29,12 @@ class Store extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
-    }    
+    } 
+    
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
 
     public function owner(): BelongsTo
     {
