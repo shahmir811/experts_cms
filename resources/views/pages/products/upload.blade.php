@@ -52,7 +52,7 @@
                                 <div class="invalid-feedback d-block">{{ $message }}</div> <!-- Added d-block -->
                             @enderror
                             <small class="form-text text-muted">
-                                <a href="{{ asset('samples/KeepaExport-file.xlsx') }}" download>
+                                <a href="{{ asset('samples/KeepaExport.xlsx') }}" download>
                                     Download Sample Excel File
                                 </a>
                             </small>

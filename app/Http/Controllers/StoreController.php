@@ -59,7 +59,9 @@ class StoreController extends Controller
     public function show(string $slug)
     {
         $store = Store::where('slug', $slug)->first();
-        return view('pages.stores.show', compact('store'));
+        $products = $store->products()->paginate(10); // Paginate with 10 items per page
+        
+        return view('pages.stores.show', compact('store', 'products'));
     }
 
     /**

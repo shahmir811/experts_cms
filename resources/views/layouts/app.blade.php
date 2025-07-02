@@ -28,7 +28,7 @@
     </div>
 
     <!-- production version of vuejs 2.0, optimized for size and speed -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>  
+    {{-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>   --}}
     @stack('scripts') <!-- To use, add @push('scripts') ... @endpush -->
 </body>
 </html>

@@ -97,8 +97,6 @@ class ProductController extends Controller
 
         $store = Store::findOrFail($request->store_id);
 
-        // dd("Hello");
-
         if ($validator->fails()) {
             return redirect()
                 ->back()

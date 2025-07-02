@@ -39,6 +39,7 @@
                   <th>#</th>
                   <th>Name</th>
                   <th>Owner</th>
+                  <th>Products Count</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -48,6 +49,7 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $store->name }}</td>
                     <td>{{ $store->owner->name }}</td>
+                    <td>{{ $store->products->count() }}</td>
                     <td>
                       <a href="{{ route('stores.show', $store->slug) }}" class="btn btn-warning mr-5">View</a>
                       <a href="{{ route('stores.edit', $store->slug) }}" class="btn btn-primary">Edit</a>
