@@ -15,7 +15,21 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $products = Product::where('title', 'like', "%{$search}%")->orWhere('asin', 'like', "%{$search}%")->get();
+        $products = Product::with('store')
+            ->when($search, function($query) use ($search) {
+                return $query->where('title', 'like', "%{$search}%")
+                            ->orWhere('asin', 'like', "%{$search}%");
+            })
+            ->paginate(10);
+
+        // Proper AJAX response check
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'html' => view('pages.products.partials.products_rows', ['products' => $products])->render(),
+                'next_page' => $products->nextPageUrl()
+            ]);
+        }
+
         return view('pages.products.index', compact('products'));
     }
 
@@ -24,6 +38,17 @@ class ProductController extends Controller
         $stores = Store::all();
         return view('pages.products.upload', compact('stores'));
     }
+
+    public function showDetail(Product $product)
+    {
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'html' => view('pages.products.partials.product_detail', ['product' => $product])->render()
+            ]);
+        }
+        
+        return view('pages.products.detail', compact('product'));
+    }    
 
 
     public function processUpload(Request $request)

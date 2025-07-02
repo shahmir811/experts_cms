@@ -55,6 +55,7 @@ Route::group(['middleware'=> 'auth'], function () {
     Route::get('products', [ProductController::class, 'index'])->name('products.index');
     Route::get('products/upload', [ProductController::class, 'upload'])->name('products.upload.form');
     Route::post('products/upload', [ProductController::class, 'processUpload'])->name('products.upload');
+    Route::get('/products/{product}/detail', [ProductController::class, 'showDetail'])->name('products.detail');
 
 
 });
