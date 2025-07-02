@@ -159,6 +159,33 @@
           <h4>Products ({{ $products->total() }})</h4>
         </div>
         <div class="card-body">
+
+          <!-- Search form -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <form method="get" action="{{ route('stores.show', $store->slug) }}">
+                <div class="input-group">
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    name="search" 
+                    placeholder="Search by title or ASIN" 
+                    value="{{ request('search') }}"
+                  >
+                  <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search"></i> Search
+                  </button>
+                  @if(request('search'))
+                    <a href="{{ route('stores.show', $store->slug) }}" class="btn btn-secondary">
+                      <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                  @endif
+                </div>
+              </form>
+            </div>
+          </div>
+
+
           <div class="table-responsive">
             <table class="table table-bordered">
               <thead>

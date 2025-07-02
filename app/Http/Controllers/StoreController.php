@@ -56,11 +56,19 @@ class StoreController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $slug)
+    public function show(string $slug, Request $request)
     {
-        $store = Store::where('slug', $slug)->first();
-        $products = $store->products()->paginate(10); // Paginate with 10 items per page
+        $store = Store::where('slug', $slug)->firstOrFail();
         
+        $search = $request->input('search');
+
+        $products = $store->products()
+            ->when($search, function ($query) use ($search) {
+                $query->where('title', 'like', "%{$search}%")
+                    ->orWhere('asin', 'like', "%{$search}%");
+            })
+            ->paginate(10);
+
         return view('pages.stores.show', compact('store', 'products'));
     }
 
